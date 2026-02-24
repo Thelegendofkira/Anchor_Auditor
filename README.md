@@ -1,51 +1,62 @@
-🦀 Solana Anchor Auditor
-A lightweight, AI-powered static analysis tool for Solana smart contracts.
+# 🛡️ Solana Anchor Auditor
 
-Instead of manually copying and pasting dozens of Rust files into ChatGPT, this tool takes a GitHub repository URL, automatically recursively fetches all the Anchor smart contract files (.rs), and feeds them into an LLM to generate a consolidated security report.
+**Live Demo:** https://anchor-auditor.vercel.app/
 
-Built as a Proof of Work MVP for the Solana India Fellowship.
+An AI-powered static analysis tool that instantly detects Solana-specific vulnerabilities in Rust smart contracts. Built to streamline the auditing process for Web3 developers, this tool dynamically fetches raw `.rs` files directly from GitHub repositories and processes them through LLMs tuned strictly for the Anchor framework's security standards.
 
-✨ Features
-Instant Repo Parsing: Just paste a GitHub link. The backend automatically crawls the Git tree, filters for .rs files in the programs/ or src/ directories, and grabs the raw code.
+## ✨ Features
 
-BYOK (Bring Your Own Key): Defaults to a free, high-speed Gemini 2.5 Flash-Lite endpoint. Power users can plug in their own API keys to route the audit through Anthropic (Claude 3.5 Sonnet), Groq (Llama 3), or standard Gemini models.
+* **Recursive Repository Scanning:** Paste a full GitHub repository URL. The backend automatically hits the GitHub Trees API to traverse the directory, filtering and concatenating only relevant `.rs` files from `programs/` and `src/` folders.
+* **Domain-Specific AI Auditing:** The system prompt is heavily engineered to look for Solana-specific attack vectors, including missing signer checks, account aliasing, missing ownership constraints, and unchecked accounts.
+* **Bring Your Own Key (BYOK):** Flexible AI routing architecture. Users can use the default free-tier model or plug in their own API keys for:
+    * Google Gemini 2.5 Flash-Lite (Default)
+    * Anthropic Claude 3.5 Sonnet
+    * Groq (Llama 3 70B)
+* **Developer-First UI:** A fast, functional, and bloat-free interface that returns clean, syntax-highlighted Markdown reports.
 
-Anchor-Specific Context: The system prompts are tuned specifically to look for Solana/Anchor vulnerabilities like missing signer checks, account aliasing (dup constraints), and unauthorized CPIs.
+## 🛠️ Tech Stack
 
-Markdown Reports: Clean, formatted output that breaks down vulnerabilities file-by-file.
+* **Framework:** Next.js 14 (App Router)
+* **Language:** TypeScript
+* **Styling:** Tailwind CSS
+* **APIs:** GitHub REST API, Google Generative AI SDK, Anthropic API, Groq API
+* **Markdown:** `react-markdown`
 
-🏗️ Architecture Under the Hood
-This is a full-stack Next.js (App Router) application.
+## 🚀 Getting Started (Local Development)
 
-The Frontend: A strictly functional React interface. No unnecessary animations, just form validation and state management. It sends the repo URL and provider choice to the backend.
+### 1. Clone the repository
+\`\`\`bash
+git clone https://github.com/Thelegendofkira/anchor-auditor.git
+cd anchor-auditor
+\`\`\`
 
-The GitHub Fetcher (Backend): The Next.js API route hits the GitHub Git Trees API (/git/trees/main?recursive=1) to get a flat map of the repository. It filters for Rust files and uses Promise.all to concurrently fetch the raw text of up to 15 files at once.
+### 2. Install dependencies
+\`\`\`bash
+npm install
+\`\`\`
 
-The AI Router (Backend): All fetched files are concatenated into one massive string with --- FILE: [path] --- delimiters. A switch statement routes this payload to the correct LLM provider (Google SDK, or native fetch for Anthropic/Groq) based on the user's BYOK selection.
+### 3. Set up environment variables
+Create a `.env.local` file in the root directory and add your default Gemini API key:
+\`\`\`env
+GEMINI_API_KEY=your_google_gemini_api_key_here
+\`\`\`
 
-The Output: The LLM streams or returns a Markdown response, which is sent back to the client and rendered using react-markdown.
-
-⚠️ Limitations & Edge Cases (Keepin' it real)
-Because this is a rapid MVP, there are a few physical limitations to be aware of:
-
-Vercel Serverless Timeouts: If you point this at a massive repository (like the entire Solana Labs monorepo), the Vercel serverless function will likely hit its 10-to-15 second timeout limit while waiting for the LLM to read 100,000 lines of code. It works best on standard-sized protocol repos.
-
-File Caps: To prevent timeouts and API rate limits, the backend currently caps the concurrent file fetch to a maximum of 15 .rs files per request.
-
-AI Hallucinations: This is an AI tool, not a human auditor. It might flag intended logic as a bug, or miss complex architectural exploits. Do not use this as the sole security check for production funds.
-
-🚀 Local Setup
-If you want to spin this up locally:
-
-Clone the repo and run npm install.
-
-Create a .env.local file in the root directory.
-
-Add your default Gemini API key:
-
-Code snippet
-GEMINI_API_KEY=your_key_here
-Run the development server:
-
-Bash
+### 4. Run the development server
+\`\`\`bash
 npm run dev
+\`\`\`
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+
+## 🧪 How to Test
+
+You can test the auditor using official Anchor framework test repositories. 
+
+1. Open the application.
+2. Ensure the provider is set to "Default - Gemini Flash-Lite (Free)".
+3. Paste the following URL into the input field:
+   `https://github.com/coral-xyz/anchor`
+4. Click **Run Security Audit**. The system will fetch the relevant Rust files and generate a comprehensive security report detailing vulnerabilities like account aliasing (e.g., the `dup` constraint in the realloc tests) and unchecked accounts.
+
+## 🎯 Purpose
+
+This project was built as a Proof of Work submission for the **Solana India Fellowship**. It demonstrates full-stack architecture, secure API orchestration, and a deep understanding of Solana/Anchor developer tooling needs.
